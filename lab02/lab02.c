@@ -45,7 +45,12 @@ void free_data(char*** data, int rows, int cols);
 
 void apply_by_row(void (*func)(char*, int, int, int, int), char*** data, 
                   int rows, int cols);
-void capitalize_first_col(char* in_str, int row, int col, int rows, int cols);
+
+void capitalize_first_col(char* in_str, int row, int col, int rows, int cols){
+
+
+
+};
 void print_str(char* in_str, int row, int col, int rows, int cols);
 
 int main(int argc, char** argv)
@@ -63,7 +68,15 @@ int main(int argc, char** argv)
   printf("\nOriginal matrix:\n");
   apply_by_row(print_str, data, data_rows, data_cols);
 
-  // TODO: add your test calls for parts (3) and (5) here
+  printf("\nAfter capitalize_first_col:\n");
+  apply_by_row(capitalize_first_col, data, data_rows, data_cols);
+  apply_by_row(print_str, data, data_rows, data_cols);
+
+
+printf("\nPrinted column-by-column:\n");
+apply_by_col(print_str, data, data_rows, data_cols);
+
+
 
   return 0;
 }
@@ -160,10 +173,15 @@ void print_str(char* in_str, int row, int col, int rows, int cols)
  */
 void
 capitalize_first_col(char* in_str, int row, int col, int rows, int cols)
-{
-  // TODO: add your code for part (2) here
-}
+{ 
+  if (col == 0) {
+    for (int i = 0; in_str[i] != '\0'; i++) {
+      in_str[i] = toupper((unsigned char)in_str[i]);
 
+    }
+  }
+
+}
 
 /*
  * Applies the given function to each entry in a two-dimensional array.
@@ -176,10 +194,14 @@ capitalize_first_col(char* in_str, int row, int col, int rows, int cols)
  *   4) the total number of rows;
  *   5) the total number of columns.
  */
-void
+void 
 apply_by_col(void (*func)(char*, int, int, int, int),
-             char*** data,
-             int rows, int cols)
+                  char*** data, int rows, int cols)
 {
-  // TODO: add your code for part (4) here
+  for (int j = 0; j < cols; j++) {
+    for (int i = 0; i < rows; i++) {
+      func(data[i][j], i, j, rows, cols);
+    }
+  }
 }
+
