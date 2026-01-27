@@ -172,24 +172,26 @@ void convert_coo_to_csr(int* row_ind, int* col_ind, double* val,
                         unsigned int** csr_row_ptr, unsigned int** csr_col_ind,
                         double** csr_vals)
 
-{
-  /* TODO */
+    //index shift for csr 
+    {
+    for (int k = 0; k < nnz; k++) {
+        row_ind[k]--;
+        col_ind[k]--;
+    }
 
-  for (int k = 0; k < nnz; k++) {
-    row_ind[k]--;
-    col_ind[k]--;
-}
-
-
+    //Memory allocation for new matrix 
     (void)n;
     *csr_row_ptr = (unsigned int*)malloc((m + 1) * sizeof(unsigned int));
     *csr_col_ind = (unsigned int*)malloc(nnz * sizeof(unsigned int));
     *csr_vals    = (double*)malloc(nnz * sizeof(double));
 
+
+    //Easier ptr formatting :P
     unsigned int* row_ptr = *csr_row_ptr;
     unsigned int* col_out = *csr_col_ind;
     double* val_out = *csr_vals; 
 
+    //count nonzeros per row
     unsigned int* row_counts = (unsigned int*)calloc(m, sizeof(unsigned int));
     for (int k = 0; k < nnz; k++) {
         row_counts[row_ind[k]]++;
@@ -198,7 +200,7 @@ void convert_coo_to_csr(int* row_ind, int* col_ind, double* val,
     row_ptr[0] = 0;
     for (int r = 0; r < m; r++) {
         row_ptr[r + 1] = row_ptr[r] + row_counts[r];
-    }
+    } //row_ptr[m] == nnz 
 
     unsigned int* next = (unsigned int*)malloc(m * sizeof(unsigned int));
     memcpy(next, row_ptr, m * sizeof(unsigned int));
@@ -283,8 +285,6 @@ void spmv(unsigned int* csr_row_ptr, unsigned int* csr_col_ind,
           double* csr_vals, int m, int n, int nnz, 
           double* vector_x, double* res)
 {
-    (void)n;   
-    (void)nnz; 
 
     for (int r = 0; r < m; r++) {
         double sum = 0.0;
@@ -296,8 +296,8 @@ void spmv(unsigned int* csr_row_ptr, unsigned int* csr_col_ind,
             unsigned int c = csr_col_ind[i];
             sum += csr_vals[i] * vector_x[c];
         }
-        res[r] = sum;
 
+        res[r] = sum;
     }
 }
 
@@ -396,7 +396,7 @@ int main(int argc, char** argv)
     strcpy(vectorName, argv[2]);
     fprintf(stdout, "Vector file name: %s ... ", vectorName);
     double* vector_x;
-    int vector_size;
+    unsigned int vector_size;
     read_vector(vectorName, &vector_x, &vector_size);
     assert(n == vector_size);
     fprintf(stdout, "file loaded\n");
