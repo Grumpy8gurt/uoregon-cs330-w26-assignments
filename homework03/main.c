@@ -19,7 +19,7 @@
  */
 void usage(int argc, char** argv)
 {
-    if(argc < 4) {
+    if(argc != 4) {
         fprintf(stderr, "usage: %s <matrix> <vector> <result>\n", argv[0]);
         exit(EXIT_FAILURE);
     } 
@@ -174,6 +174,45 @@ void convert_coo_to_csr(int* row_ind, int* col_ind, double* val,
 
 {
   /* TODO */
+
+  for (int k = 0; k < nnz; k++) {
+    row_ind[k]--;
+    col_ind[k]--;
+}
+
+
+    (void)n;
+    *csr_row_ptr = (unsigned int*)malloc((m + 1) * sizeof(unsigned int));
+    *csr_col_ind = (unsigned int*)malloc(nnz * sizeof(unsigned int));
+    *csr_vals    = (double*)malloc(nnz * sizeof(double));
+
+    unsigned int* row_ptr = *csr_row_ptr;
+    unsigned int* col_out = *csr_col_ind;
+    double* val_out = *csr_vals; 
+
+    unsigned int* row_counts = (unsigned int*)calloc(m, sizeof(unsigned int));
+    for (int k = 0; k < nnz; k++) {
+        row_counts[row_ind[k]]++;
+    }
+
+    row_ptr[0] = 0;
+    for (int r = 0; r < m; r++) {
+        row_ptr[r + 1] = row_ptr[r] + row_counts[r];
+    }
+
+    unsigned int* next = (unsigned int*)malloc(m * sizeof(unsigned int));
+    memcpy(next, row_ptr, m * sizeof(unsigned int));
+
+    for (int k = 0; k < nnz; k++) {
+        int r = row_ind[k];
+        unsigned int dest = next[r]++;
+        col_out[dest] = (unsigned int)col_ind[k];
+        val_out[dest] = val[k];
+    }
+
+    free(next);
+    free(row_counts);
+
 }
 
 /* This function reads in a vector from a text file, similar in format to
@@ -244,7 +283,22 @@ void spmv(unsigned int* csr_row_ptr, unsigned int* csr_col_ind,
           double* csr_vals, int m, int n, int nnz, 
           double* vector_x, double* res)
 {
-  /* TODO */
+    (void)n;   
+    (void)nnz; 
+
+    for (int r = 0; r < m; r++) {
+        double sum = 0.0;
+
+        unsigned int start = csr_row_ptr[r];
+        unsigned int end   = csr_row_ptr[r + 1];
+
+        for (unsigned int i = start; i < end; i++) {
+            unsigned int c = csr_col_ind[i];
+            sum += csr_vals[i] * vector_x[c];
+        }
+        res[r] = sum;
+
+    }
 }
 
 
@@ -342,7 +396,7 @@ int main(int argc, char** argv)
     strcpy(vectorName, argv[2]);
     fprintf(stdout, "Vector file name: %s ... ", vectorName);
     double* vector_x;
-    unsigned int vector_size;
+    int vector_size;
     read_vector(vectorName, &vector_x, &vector_size);
     assert(n == vector_size);
     fprintf(stdout, "file loaded\n");
