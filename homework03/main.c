@@ -19,7 +19,7 @@
  */
 void usage(int argc, char** argv)
 {
-    if(argc != 4) {
+    if(argc < 4) {
         fprintf(stderr, "usage: %s <matrix> <vector> <result>\n", argv[0]);
         exit(EXIT_FAILURE);
     } 
